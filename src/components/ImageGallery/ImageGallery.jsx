@@ -49,6 +49,7 @@ export const ImageGallery = ({searchText}) => {
                 console.log(error);
                 setStatus('rejected')
             })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [page])
 
     const addPage = () => { 
