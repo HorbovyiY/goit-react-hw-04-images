@@ -1,4 +1,4 @@
-import React from "react";
+import {useState, useEffect} from "react";
 import PropTypes from 'prop-types'
 
 import * as API from "../../services/api";
@@ -8,74 +8,79 @@ import { Loader } from "components/Loader/Loader";
 import { Modal } from "components/Modal/Modal";
 import { Gallery } from "./ImageGallery.styled";
 
-export class ImageGallery extends React.Component { 
-    state = {
-        images: [],
-        page: 1,
-        status: 'idle', //pending, resolved, rejected
-        id: null,
-        showModal: false
+export const ImageGallery = ({searchText}) => { 
+    const [images, setImages] = useState([])
+    const [page, setPage] = useState(1)
+    const [status, setStatus] = useState('idle') //pending, resolved, rejected
+    const [id, setId] = useState(null)
+    const [showModal, setShowModal] = useState(false)
+
+    useEffect(() => { 
+        if (searchText === '') { return }
+        
+        setStatus('pending');
+        setPage(1);
+
+        API.getImage(searchText, 1)
+            .then((response) => response.json())
+            .then((data) => {
+                setImages(data.hits);
+                setStatus('resolved');
+            })
+            .catch((error) => {
+                console.log(error);
+                setStatus('rejected');
+            });
+    },[searchText])
+
+    useEffect(() => {
+        if (searchText === '') { return }
+        if (page === 1) { return}
+        
+        setStatus('pending');
+
+        API.getImage(searchText, page)
+            .then((response) => response.json())
+            .then((data) => {
+                setImages([...images, ...data.hits]);
+                setStatus('resolved');
+            })
+            .catch((error) => {
+                console.log(error);
+                setStatus('rejected')
+            })
+    }, [page])
+
+    const addPage = () => { 
+        setPage(prevState => prevState + 1)
     }
 
-    componentDidUpdate(prevProps, prevState) { 
-        if (prevProps.searchText !== this.props.searchText) { 
-            this.setState({ status: 'pending', page: 1 });
-            
-            API.getImage(this.props.searchText)
-                .then((response) => response.json())
-                .then((data) => this.setState({ images: data.hits, status: 'resolved' }))
-                .catch((error) => {
-                    console.log(error);
-                    this.setState({ status: 'rejected' })
-                });
-        }
-
-        if (prevState.page !== this.state.page) { 
-            this.setState({ status: 'pending' });
-            
-            API.getImage(this.props.searchText, this.state.page)
-                .then((response) => response.json())
-                .then((data) => this.setState({ images: [...this.state.images, ...data.hits], status: 'resolved' }))
-                .catch((error) => {
-                    console.log(error);
-                    this.setState({status: 'rejected'})
-                })
-
-        }
+    const closeModal=()=>{ 
+        setShowModal(false)
     }
 
-    addPage = () => { 
-        this.setState((prevState) => { return { page: prevState.page + 1 }; })
+    const openModal=(id)=>{ 
+        setShowModal(true)
+        setId(id)
     }
 
-    closeModal=()=>{ 
-        this.setState({ showModal: false })
-    }
-
-    openModal=(id)=>{ 
-        this.setState({ showModal: true })
-        this.setState({id: id})
-    }
-
-    render() { 
-        return (
+    return (
             <div>
-                {(this.state.status === 'pending') && <Loader />}
-                {(this.state.status === 'resolved') && (
+                {(status === 'pending') && <Loader />}
+                {(status === 'resolved') && (
                     <Gallery>
-                        <ImageGalleryItem images={this.state.images} onChooseImage={this.openModal} />
+                        <ImageGalleryItem images={images} onChooseImage={openModal} />
                     </Gallery>)}
-                {(this.state.images.length > 0) && <Button add={this.addPage} />}
-                {(this.state.status==='rejected')&& <p>Сталась помилка</p> }
-                {(this.state.showModal) && (
+                {(images.length > 0) && <Button add={addPage} />}
+                {(status==='rejected')&& <p>Сталась помилка</p> }
+                {(showModal) && (
                     <Modal
-                        images={this.state.images}
-                        closeModal={this.closeModal}
-                        id={ this.state.id}
+                        images={images}
+                        closeModal={closeModal}
+                        id={id}
                     />)}
             </div>
         )
-    }
 }
 
 ImageGallery.propTypes = {

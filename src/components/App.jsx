@@ -1,19 +1,16 @@
-import React from "react";
+import { useState} from "react";
 
 import { ImageGallery } from "./ImageGallery/ImageGallery";
 import { SearchBar } from "./Searchbar/Searchbar";
 
-export class App extends React.Component {
-  state = {
-    searchText: '',
+export const App =()=> {
+  const [searchText, setSearchText] = useState('');
+
+  const onSubmit = (text) => { 
+    setSearchText(text)
   }
 
-  onSubmit = (text) => { 
-    this.setState({searchText: text})
-  }
-
-  render() { 
-    return(
+  return(
       <div
         style={{
           display: 'grid',
@@ -22,9 +19,8 @@ export class App extends React.Component {
           paddingBottom: '24px',
         }}
       >
-        <SearchBar onSubmit={this.onSubmit} />
-        <ImageGallery searchText={this.state.searchText}/>
+        <SearchBar onSubmitForm={onSubmit} />
+        <ImageGallery searchText={searchText}/>
       </div>
     )
-  };
 };

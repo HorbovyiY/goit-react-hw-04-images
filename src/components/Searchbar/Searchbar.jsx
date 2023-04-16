@@ -1,32 +1,29 @@
-import React from "react";
+import { useState } from "react";
 import PropTypes from 'prop-types'
 
 import { Header, Form, Button, ButtonLabel, FormInput} from "./Searchbar.styled";
 
-export class SearchBar extends React.Component {
-    state = {
-        searchText: '',
+export const SearchBar = ({onSubmitForm}) => {
+    const [searchText, setSearchText] = useState('');
+
+    const onChange = (e) => { 
+        setSearchText( e.currentTarget.value)
     }
 
-    onChange = (e) => { 
-        this.setState({searchText: e.currentTarget.value})
-    }
-
-    onSubmit = (e) => { 
+    const onSubmit = (e) => { 
         e.preventDefault();
 
-        this.props.onSubmit(this.state.searchText);
-        this.resetSearch();
+        onSubmitForm(searchText);
+        resetSearch();
     }
 
-    resetSearch = () => { 
-        this.setState({searchText: ''})
+    const resetSearch = () => { 
+        setSearchText('')
     }
 
-    render() { 
-        return (
+    return (
             <Header>
-                <Form onSubmit={this.onSubmit}>
+                <Form onSubmit={onSubmit}>
                 <Button type="submit">
                     <ButtonLabel>Search</ButtonLabel>
                 </Button>
@@ -36,14 +33,14 @@ export class SearchBar extends React.Component {
                     autoComplete="off"
                     autoFocus
                     placeholder="Search images and photos"
-                    value={this.state.searchText}
-                    onChange={this.onChange}
+                    value={searchText}
+                    onChange={onChange}
                 />
             </Form>
-            </Header>)
-    }
+        </Header>
+    )
 }
 
 SearchBar.propTypes = {
-    onSubmit: PropTypes.func.isRequired
+    onSubmitForm: PropTypes.func.isRequired
 }
