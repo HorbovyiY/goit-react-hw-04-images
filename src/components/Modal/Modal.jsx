@@ -17,8 +17,8 @@ export const Modal = ({ images, closeModal, id }) => {
             if (e.code === 'Escape') {
                 closeModal();
             }
-        } 
-
+    } 
+    
     const handleOverlayClick = e => { 
         if (e.target === e.currentTarget) { 
             closeModal();
